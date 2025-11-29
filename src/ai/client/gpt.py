@@ -2,7 +2,7 @@ import os
 from src.ai.client.base import AIClient
 from src.ai.typeh import AIChatResponse
 from openai import OpenAI
-from src.config import logger
+from src.config import logger, AI_MODEL
 
 
 class GPTClient(AIClient):
@@ -11,7 +11,7 @@ class GPTClient(AIClient):
         client = OpenAI(api_key=os.environ["OPEN_AI_API_KEY"])
 
         response = client.chat.completions.create(
-            model="gpt-4.1-nano",
+            model=AI_MODEL,
             store=False,
             messages=[
                 {
@@ -27,6 +27,6 @@ class GPTClient(AIClient):
             content=response.choices[0].message.content
         )
 
-        logger.info(result)
+        logger.debug(result)
 
         return result

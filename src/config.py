@@ -2,6 +2,9 @@ import logging
 import logging.config
 
 
+AI_MODEL = "gpt-5-mini"
+
+
 LOGGING_CONFIG = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -13,7 +16,7 @@ LOGGING_CONFIG = {
     "loggers": {
         __name__: {
             "handlers": ["console"],    
-            "level": "INFO",
+            "level": "DEBUG",
             "propagate": False
         }
     }
