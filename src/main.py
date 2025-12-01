@@ -5,30 +5,85 @@ Usage:
 import sys
 from src.ai.ocr import ai_ocr
 from src.ai.grade_exam import ai_grade_exam
-from src.config import logger
+from src.config import logger, ASPECT_LABEL
 from datetime import datetime
+from src.pdf import pdf
+
+
+OCR_THRESHOLD = 70
 
 
 def main(theme: str, essay_path: str):
-    in_tokens_result = 0
-    out_tokens_result = 0
-
     logger.info("Realizando OCR")
 
-    in_tokens, out_tokens, essay = ai_ocr.pdf_to_text(essay_path)
+    ocr_response = ai_ocr.pdf_to_text(essay_path)
 
-    in_tokens_result += in_tokens
-    out_tokens_result += out_tokens
+    if ocr_response.ocr.score < OCR_THRESHOLD:
+        print(f"Impossível compreender o texto, {ocr_response.ocr.score}%")
+        
+        logger.info(f"input tokens: {ocr_response.input_tokens}")
+        logger.info(f"output tokens: {ocr_response.output_tokens}")    
+        return
+
+    essay = ocr_response.ocr.text
 
     logger.info("Validando Resultado")
-    in_tokens, out_tokens, final_grade = ai_grade_exam.execute(theme, essay)
+    grade_response = ai_grade_exam.execute(theme, essay)
+
+    FONT_SIZE = "8pt"
+    MARGIN_TOP_BOTTOM = "4px"
+
+    pdf_content = f"""
+        <b style="display: block; font-size: {FONT_SIZE}; margin: 0 0 {MARGIN_TOP_BOTTOM} 0;">Nota Final: {round(grade_response.final_grade, 2)}/10</b>
+    """
+
+    for key, value in grade_response.grades.items():
+        pdf_content += f"""
+        <b style="font-size: {FONT_SIZE};">{ASPECT_LABEL[key]} ({key}):</b>
+
+        <b style="display: block; font-size: {FONT_SIZE}; margin: {MARGIN_TOP_BOTTOM} 0 {MARGIN_TOP_BOTTOM} 24px;">&#10003; Nota: {value.grade}</b>
+
+        <b style="font-size: {FONT_SIZE};">Feedback:</b>
+
+        <br/>
+
+        {value.feedback}
+        """
+
+        if value.notes:
+            pdf_content += f"""
+            <br/>
+
+            <b style="font-size: {FONT_SIZE};">Pontos Importantes:</b>
+
+            <br/>
+
+            {value.notes}
+            """
+
+
+        if value.corrections:
+            pdf_content += f"""
+            <br/>
+
+            <b style="font-size: {FONT_SIZE};">Correções:</b>
+
+            <br/>
+
+            {value.corrections}
+            """
+
+        if not pdf_content.endswith("<br/>"):
+            pdf_content += "<br/>"
+
+    pdf.generate(pdf_content, "output.pdf")
     
-    in_tokens_result += in_tokens
-    out_tokens_result += out_tokens
+    input_tokens = ocr_response.input_tokens + grade_response.input_tokens
+    output_tokens = ocr_response.output_tokens + grade_response.output_tokens
     
-    logger.info(f"nota: {round(final_grade, 2)}")
-    logger.info(f"input tokens: {in_tokens_result}")
-    logger.info(f"output tokens: {out_tokens_result}")    
+    logger.info(f"nota: {round(grade_response.final_grade, 2)}")
+    logger.info(f"input tokens: {input_tokens}")
+    logger.info(f"output tokens: {output_tokens}")    
 
 
 if __name__ == "__main__":
@@ -37,13 +92,6 @@ if __name__ == "__main__":
     main(sys.argv[1], sys.argv[2])
 
     print(datetime.now() - start)
-
-
-
-
-
-
-
 
 
 

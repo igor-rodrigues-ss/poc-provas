@@ -1,8 +1,10 @@
+import datetime
 import time
 import uuid
 
 from fastapi import FastAPI, File, UploadFile, Form
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 
 from src import main as ai_grade
 from src.config import logger
@@ -38,8 +40,10 @@ async def create_upload_file(file: UploadFile = File(...), theme: str = Form(...
         content = await file.read()
         buffer.write(content)
     
-    ai_grade.main(theme, file_path)
+    start = datetime.datetime.now()
     
-    time.sleep(5)
+    ai_grade.main(theme, file_path)
+
+    logger.info(f"Duration: {datetime.datetime.now() - start}")
 
     return {"filename": file_id}

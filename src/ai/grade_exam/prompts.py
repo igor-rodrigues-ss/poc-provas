@@ -1,12 +1,24 @@
 from src.ai.grade_exam.typeh import GradeEssayPrompt
 
 
-CONDITION_PROMPT = GradeEssayPrompt("", """
+RESPONSE_STRUCTURE = """
+Devolva a nota numéria, feedback como um texto direto em html e sem cumprimentos, pontos importantes como uma lista ordenada em html e correções como uma lista ordenada em html na seguinte estrutura:
+
+grade: nota numérica
+feedback: feedback um texto de um único parágrafo em html, sem cumprimentos, sem emojis e sem estilização css.
+notes: pontos importantes a serem observados sem cumprimentos, sem emojis e sem estilização css. caso não tenha pontos importantes a serem observados deverá ser retornado o valor "nulo".
+corrections: correções a serem realizadas, sem emojis e sem estilização css, caso não tenha correções a serem feitas deverá ser retornado o valor "nulo".
+
+[grade: nota | feedback: feedback | notes: lista html ou nulo | corrections: lista html ou nulo]
+"""
+
+
+CONDITION_PROMPT = GradeEssayPrompt("", f"""
 Avalie esta redação baseado nos critérios abaixo:
 
-O tema esperado da redação é: ""{theme}""
+O tema esperado da redação é: ""{{theme}}""
 
-Redação: ""{essay}""
+Redação: ""{{essay}}""
 
 Caso a redação apresente as condições abaixo, todos os critérios serão zerados:
 
@@ -23,24 +35,19 @@ nome qualquer, número(s), letra(s), sinais, desenhos ou códigos);
 j) apresentar textos sob forma não articulada verbalmente, apenas com desenho(s), número(s) e/ou
 palavras soltas.
 
-Devolva a nota numéria e feedback em html na seguinte estrutura:
-
-0 = reprovado
-1 = aprovado
-
-[grade: nota | feedback: feedback em html]
+{RESPONSE_STRUCTURE}
 """)
 
 
 GRADE_PROMPT_CHAIN: tuple[GradeEssayPrompt, ...] = (
-    GradeEssayPrompt("AP", """
-Avalie a redação abaixo de forma muito amigável, tolerante e nada rigorosa.
+    GradeEssayPrompt("AP", f"""
+Avalie a redação abaixo.
 
 Sempre que houver dúvida entre notas, escolha as notas mais altas.
 
-O tema esperado da redação é: ""{theme}""
+O tema esperado da redação é: ""{{theme}}""
 
-Redação: ""{essay}""
+Redação: ""{{essay}}""
 
 ===========================================================
 
@@ -51,20 +58,19 @@ delimitadoras do texto, a estruturação dos
 parágrafos (sobretudo a indicação de
 parágrafos) e a legibilidade.
 
-Possíveis notas: 0.00, 0.50, 1.00, 1.50, 2.00
+Possíveis notas (valor do campo grade): 0.00, 0.50, 1.00, 1.50, 2.00
 
-Devolva a nota numéria e feedback em html na seguinte estrutura:
+{RESPONSE_STRUCTURE}
 
-[grade: nota | feedback: feedback em html]
-"""),
-    GradeEssayPrompt("CR", """
-Avalie a redação abaixo de forma muito amigável, tolerante e nada rigorosa.
+""", max_grade=2),
+    GradeEssayPrompt("CR", f"""
+Avalie a redação abaixo.
 
 Sempre que houver dúvida entre notas, escolha as notas mais altas.
 
-O tema esperado da redação é: ""{theme}""
+O tema esperado da redação é: ""{{theme}}""
 
-Redação: ""{essay}""
+Redação: ""{{essay}}""
 
 ===========================================================
 
@@ -78,21 +84,19 @@ por obstáculos como obscuridade,
 contradições, falta de articulação entre ideias e
 falha na construção de sentidos.
 
-Possíveis notas: 0.00, 0.50, 1.00, 1.50, 2.00
+Possíveis notas (valor do campo grade): 0.00, 0.50, 1.00, 1.50, 2.00
 
-Devolva a nota numéria e feedback em html na seguinte estrutura:
+{RESPONSE_STRUCTURE}
+""", max_grade=2),
 
-[grade: nota | feedback: feedback em html]
-"""),
-
-    GradeEssayPrompt("CS", """
-Avalie a redação abaixo de forma muito amigável, tolerante e nada rigorosa.
+    GradeEssayPrompt("CS", f"""
+Avalie a redação abaixo.
 
 Sempre que houver dúvida entre notas, escolha as notas mais altas.
 
-O tema esperado : ""{theme}""
+O tema esperado : ""{{theme}}""
 
-Redação: ""{essay}""
+Redação: ""{{essay}}""
 
 Criterio: Coesão (CS)
 
@@ -103,21 +107,19 @@ deve ser estabelecida pelo emprego adequado
 e diversificado dos mecanismos linguísticos
 necessários para a construção do texto.
 
-Possíveis notas: 0.00, 0.50, 1.00, 1.50, 2.00
+Possíveis notas (valor do campo grade): 0.00, 0.50, 1.00, 1.50, 2.00
 
-Devolva a nota numéria e feedback em html na seguinte estrutura:
+{RESPONSE_STRUCTURE}
+""", max_grade=2),
 
-[grade: nota | feedback: feedback em html]
-"""),
-
-    GradeEssayPrompt("TT", """
-Avalie a redação abaixo de forma muito amigável, tolerante e nada rigorosa.
+    GradeEssayPrompt("TT", f"""
+Avalie a redação abaixo.
 
 Sempre que houver dúvida entre notas, escolha as notas mais altas.
 
-O tema esperado da redação é: ""{theme}""
+O tema esperado da redação é: ""{{theme}}""
 
-Redação: ""{essay}""
+Redação: ""{{essay}}""
 
 Criterio: Tipo Textual (TT)
 
@@ -131,39 +133,35 @@ apresentar divisão em itens ou tópicos, e não
 devem ser feitas menções diretas às partes que
 o compõem.
 
-Possíveis notas: 0.00, 0.50, 1.00, 1.50, 2.00
+Possíveis notas (valor do campo grade): 0.00, 0.50, 1.00, 1.50, 2.00
 
-Devolva a nota numéria e feedback em html na seguinte estrutura:
+{RESPONSE_STRUCTURE}
+""", max_grade=2),
 
-[grade: nota | feedback: feedback em html]
-"""),
+    GradeEssayPrompt("LG", f"""
+Avalie a redação abaixo.
 
-    GradeEssayPrompt("LG", """
-Avalie a redação abaixo de forma muito amigável, tolerante e nada rigorosa.
+O tema esperado da redação é: ""{{theme}}""
 
-O tema esperado da redação é: ""{theme}""
-
-Redação: ""{essay}""
+Redação: ""{{essay}}""
 
 Criterio: Linguagem (LG)
 
 Será avaliado o uso adequado da língua portuguesa em seu padrão culto.
 
-Possíveis notas: 0.00, 0.50, 1.00, 1.50, 2.00
+Possíveis notas (valor do campo grade): 0.00, 0.50, 1.00, 1.50, 2.00
 
-Devolva a nota numéria e feedback em html na seguinte estrutura:
+{RESPONSE_STRUCTURE}
+""", max_grade=2),
 
-[grade: nota | feedback: feedback em html]
-"""),
-
-    GradeEssayPrompt("TM", """
-Avalie a redação abaixo de forma muito amigável, tolerante e nada rigorosa.
+    GradeEssayPrompt("TM", f"""
+Avalie a redação abaixo.
 
 Sempre que houver dúvida entre notas, escolha as notas mais altas.
 
-O tema esperado: ""{theme}""
+O tema esperado: ""{{theme}}""
 
-Redação: ""{essay}""
+Redação: ""{{essay}}""
 
 Criterio: Tema (TM)
 
@@ -173,11 +171,9 @@ informações ao tema proposto, bem como a
 ordem de desenvolvimento, a qualidade e a
 força dos argumentos apresentados.
 
-Possíveis notas: 0.00, 1.00, 2.00, 3.00, 4.00, 5.00
+Possíveis notas (valor do campo grade): 0.00, 1.00, 2.00, 3.00, 4.00, 5.00
 
-Devolva a nota numéria e feedback em html na seguinte estrutura:
-
-[grade: nota | feedback: feedback em html]
-""")
+{RESPONSE_STRUCTURE}
+""", max_grade=5)
 )
 

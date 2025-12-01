@@ -1,0 +1,2 @@
+class AIContentExtraction(Exception):
+    pass

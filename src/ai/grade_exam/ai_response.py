@@ -1,29 +1,49 @@
 import re
 
-from src.ai.grade_exam.typeh import GradeResponse
+from src.ai.exceptions import AIContentExtraction
+from src.ai.grade_exam.typeh import AIGradeResponse
+
+from src.config import logger
 
 
-def process(content: str) -> GradeResponse:
-    RE_RESULT_V1 = r"grade:(.+)\|"
-    RE_RESULT_V2 = r"(.+)\|"
-    RE_FEEDBACK = r"feedback:(.+)"
+def process(raw_content: str) -> AIGradeResponse:
+    RE_RESULT_V1 = r"grade:([^|]+)"
+    RE_RESULT_V2 = r"(^[^|]+)"
+    RE_FEEDBACK = r"feedback:([^|]+)"
+    RE_NOTES = r"notes:([^|]+)"
+    RE_CORRECTIONS = r"corrections:([^|]+)"
 
     try:
-        grade = re.search(RE_RESULT_V1, content, flags=re.S)
+        content = raw_content.replace(">>", ">").replace("<<", "<")
 
-        if not grade:
-            grade = re.search(RE_RESULT_V2, content, flags=re.S)
+        raw_grade = re.search(RE_RESULT_V1, content, flags=re.S)
 
-        feedback = re.search(RE_FEEDBACK, content, flags=re.S)
+        if not raw_grade:
+            raw_grade = re.search(RE_RESULT_V2, content, flags=re.S)
 
-        grade = float(grade.group(1).strip())
-        feedback = feedback.group(1).strip()
+        raw_feedback = re.search(RE_FEEDBACK, content, flags=re.S)
+        raw_notes = re.search(RE_NOTES, content, flags=re.S)
+        raw_corrections = re.search(RE_CORRECTIONS, content, flags=re.S)
 
-        if feedback.endswith("]"):
-            feedback = feedback[:-1]
+        grade = float(raw_grade.group(1).strip())
+        feedback = raw_feedback.group(1).strip()
+        notes = raw_notes.group(1).strip()
+        corrections = raw_corrections.group(1).strip()
 
-        return GradeResponse(grade=grade, feedback=feedback)
+        if corrections.endswith("]"):
+            corrections = corrections[:-1]
+
+        if not notes or notes.lower() in ("nulo", "null", "none"):
+            notes = ""
+        
+        if not corrections or corrections.lower() in ("nulo", "null", "none"):
+            corrections = ""
+
+        return AIGradeResponse(grade=grade, feedback=feedback, notes=notes, corrections=corrections)
 
     except Exception as e:
+        logger.exception(e)
+
         breakpoint()
-        raise ValueError("Erro ao extrai dados da IA")
+
+        raise AIContentExtraction("Error to extract grade and feedback from AI response")
