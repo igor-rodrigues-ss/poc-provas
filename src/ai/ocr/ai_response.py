@@ -25,7 +25,7 @@ def process(content: str) -> OCRContentResponse:
         else:
             score = int(raw_score)
         
-        text = text.group(1).strip()
+        text = text.group(1).strip().replace('\\"', '"')
 
         if text.endswith("]"):
             text = text[:-1]

@@ -3,6 +3,7 @@ from src.ai.grade_exam import prompts
 from src.ai.grade_exam.typeh import AIGradeResponse, GradeResponse
 from src.config import logger
 from src.ai.grade_exam import ai_response
+from src.ai.grade_exam.typeh import GradeEssayPrompt
 
 
 def execute(theme: str, essay: str, max_retries: int = 3) -> GradeResponse:
@@ -26,21 +27,26 @@ def execute(theme: str, essay: str, max_retries: int = 3) -> GradeResponse:
 def _execute(theme: str, essay: str) -> GradeResponse:
     result = GradeResponse()
 
-    input_tokens, output_tokens, grade_response = _ai_chat(prompts.CONDITION_PROMPT.get_prompt(theme=theme, essay=essay))
+    prompt_init = prompts.CONDITION_PROMPT
+
+    input_tokens, output_tokens, grade_response = _ai_chat(prompt_init, theme, essay)
 
     if grade_response.grade == 0:  # Retry        
-        input_tokens, output_tokens, grade_response = _ai_chat(prompts.CONDITION_PROMPT.get_prompt(theme=theme, essay=essay))
+        input_tokens, output_tokens, grade_response = _ai_chat(prompt_init, theme, essay)
         
         result.add_tokens(input_tokens, output_tokens)
 
         if grade_response.grade == 0:
             logger.info("Redação reprovada")
+
+            result.grades[prompt_init.key] = grade_response
+
             return result
     
     result.add_tokens(input_tokens, output_tokens)
 
     for prompt in prompts.GRADE_PROMPT_CHAIN:
-        input_tokens, output_tokens, grade_response = _ai_chat(prompt.get_prompt(theme=theme, essay=essay))
+        input_tokens, output_tokens, grade_response = _ai_chat(prompt, theme, essay)
 
         result.add_tokens(input_tokens, output_tokens)
 
@@ -52,10 +58,14 @@ def _execute(theme: str, essay: str) -> GradeResponse:
     return result
 
 
-def _ai_chat(prompt: str) -> tuple[int, int, AIGradeResponse]:
-    response = GPTClient().chat(prompt)
+def _ai_chat(prompt: GradeEssayPrompt, theme: str, essay: str) -> tuple[int, int, AIGradeResponse]:
+    response = GPTClient().chat(prompt.get_prompt(theme=theme, essay=essay))
 
-    return response.input_tokens, response.output_tokens, ai_response.process(response.content)
+    grade_response = ai_response.process(response.content)
+
+    grade_response.max_grade = prompt.max_grade
+
+    return response.input_tokens, response.output_tokens, grade_response
 
     
 

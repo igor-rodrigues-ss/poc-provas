@@ -9,6 +9,7 @@ class AIGradeResponse:
     feedback: str
     notes: str
     corrections: str
+    max_grade: Optional[float] = None
 
 
 @dataclass
@@ -28,7 +29,7 @@ class GradeResponse:
 
 class GradeEssayPrompt:
 
-    def __init__(self, key: str, content: str, max_grade: Optional[int] = None):
+    def __init__(self, key: str, content: str, max_grade: Optional[float] = None):
         self.key = key
         self.content = content
         self.max_grade = max_grade

@@ -2,10 +2,11 @@ import logging
 import logging.config
 
 
-#AI_MODEL = "gpt-4.1-nano"
+#AI_MODEL = "gpt-5-nano"
 AI_MODEL = "gpt-5-mini"
 
 ASPECT_LABEL = {
+    "AI": "Avaliação Inicial",
     "AP": "Apresentação",
     "CR": "Coerência",
     "CS": "Coesão",

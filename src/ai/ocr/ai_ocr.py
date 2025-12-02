@@ -36,7 +36,7 @@ def _pdf_to_text(path: str) -> OCRResponse:
 
     client = GPTImageClient()
 
-    resp = client.chat(base64_image, "Transcreva exatamente o texto da imagem mantendo a acentuação, paragrafos e pontuações. Quero também um percentual de 0 a 100 para mostrar o quanto você entendeu do texto transcrito. Retorne os dados na seguinte estrutura: [score: percentual | text: texto transcrito].")
+    resp = client.chat(base64_image, "Transcreva exatamente o texto da imagem em html mantendo a acentuação, paragrafos e pontuações. Quero também um percentual de 0 a 100 para mostrar o quanto você entendeu do texto transcrito. Retorne os dados na seguinte estrutura: [score: percentual | text: texto transcrito em html somente com tags <p>].")
 
     ocr_response = ai_response.process(resp.content)
 
