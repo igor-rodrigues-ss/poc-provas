@@ -24,6 +24,9 @@ class GradeResponse:
     
     @property
     def final_grade(self) -> float:
+        if "AP" not in self.grades:
+            return 0
+        
         return ((self.grades["AP"].grade + self.grades["CR"].grade + self.grades["CS"].grade + self.grades["TT"].grade + self.grades["LG"].grade) + (self.grades["TM"].grade * 4)) / 3
 
 

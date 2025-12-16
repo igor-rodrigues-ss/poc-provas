@@ -30,7 +30,7 @@ def process(content: str) -> OCRContentResponse:
         if text.endswith("]"):
             text = text[:-1]
 
-        return OCRContentResponse(score=score, text=text)
+        return OCRContentResponse(score=score, html=text)
 
     except Exception as exc:
         logger.exception(exc)

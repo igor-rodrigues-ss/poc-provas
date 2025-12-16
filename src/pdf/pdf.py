@@ -15,12 +15,12 @@ def generate(grade_response: GradeResponse, essay: str, output_path: str):
 
         <b style="display: block; margin: 0 0 {MARGIN_TOP_BOTTOM} 0;">Nota Final: {round(grade_response.final_grade, 2)}/10</b>
     """
-
+    
     for key, value in grade_response.grades.items():
         pdf_content += f"""
         <b>{ASPECT_LABEL[key]} ({key}):</b>
 
-        <b style="display: block; margin: {MARGIN_TOP_BOTTOM} 0 {MARGIN_TOP_BOTTOM} 24px;">&#10003; Nota: {value.grade}/{float(value.max_grade)}</b>
+        <b style="display: block; margin: {MARGIN_TOP_BOTTOM} 0 {MARGIN_TOP_BOTTOM} 24px;">&#10003; Nota: {value.grade}/{float(value.max_grade or 0)}</b>
 
         <b>Feedback:</b>
 

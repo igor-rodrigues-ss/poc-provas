@@ -31,9 +31,10 @@ def _execute(theme: str, essay: str) -> GradeResponse:
 
     input_tokens, output_tokens, grade_response = _ai_chat(prompt_init, theme, essay)
 
-    if grade_response.grade == 0:  # Retry        
+
+    if grade_response.grade == 0:  # Retry
         input_tokens, output_tokens, grade_response = _ai_chat(prompt_init, theme, essay)
-        
+
         result.add_tokens(input_tokens, output_tokens)
 
         if grade_response.grade == 0:

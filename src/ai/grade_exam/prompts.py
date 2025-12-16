@@ -50,8 +50,6 @@ GRADE_PROMPT_CHAIN: tuple[GradeEssayPrompt, ...] = (
     GradeEssayPrompt("AP", f"""
 Avalie esta redação ignorando as tags html baseado nos critérios abaixo:
 
-Sempre que houver dúvida entre notas, escolha as notas mais altas.
-
 O tema esperado da redação é: ""{{theme}}""
 
 Redação: ""{{essay}}""
@@ -72,8 +70,6 @@ Possíveis valores para o campo grade: 0.00, 0.50, 1.00, 1.50, 2.00
 """, max_grade=2),
     GradeEssayPrompt("CR", f"""
 Avalie esta redação ignorando as tags html baseado nos critérios abaixo:
-
-Sempre que houver dúvida entre notas, escolha as notas mais altas.
 
 O tema esperado da redação é: ""{{theme}}""
 
@@ -97,9 +93,7 @@ Possíveis valores para o campo grade: 0.00, 0.50, 1.00, 1.50, 2.00
 """, max_grade=2),
 
     GradeEssayPrompt("CS", f"""
-Avalie esta redação ignorando as tags html baseado nos critérios abaixo:
-
-Sempre que houver dúvida entre notas, escolha as notas mais altas.
+Avalie esta redação de forma criteriosa ignorando as tags html baseado nos critérios abaixo:
 
 O tema esperado : ""{{theme}}""
 

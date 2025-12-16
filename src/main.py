@@ -26,24 +26,24 @@ grade: 2.00\nfeedback: <p>Texto claro, coeso e escrito em registro formal adequa
 def main(theme: str, essay_path: str):
     logger.info("Realizando OCR")
 
-    ocr_response = ai_ocr.pdf_to_text(essay_path)
+    essay = ai_ocr.pdf_to_text(essay_path)
 
-    if ocr_response.ocr.score < OCR_THRESHOLD:
-        logger.info(f"Impossível compreender o texto, {ocr_response.ocr.score}%")
+    if essay.ocr.score < OCR_THRESHOLD:
+        logger.info(f"Impossível compreender o texto, {essay.ocr.score}%")
         
-        logger.info(f"input tokens: {ocr_response.input_tokens}")
-        logger.info(f"output tokens: {ocr_response.output_tokens}")    
+        logger.info(f"input tokens: {essay.input_tokens}")
+        logger.info(f"output tokens: {essay.output_tokens}")    
         return
 
-    essay = ocr_response.ocr.text
-
     logger.info("Validando Resultado")
-    grade_response = ai_grade_exam.execute(theme, essay)
 
-    pdf.generate(grade_response, essay, "output.pdf")
+    grade_response = ai_grade_exam.execute(theme, essay.ocr.text)
+
+    pdf.generate(grade_response, essay.ocr.html, "output.pdf")
+
     
-    input_tokens = ocr_response.input_tokens + grade_response.input_tokens
-    output_tokens = ocr_response.output_tokens + grade_response.output_tokens
+    input_tokens = essay.input_tokens + grade_response.input_tokens
+    output_tokens = essay.output_tokens + grade_response.output_tokens
     
     logger.info(f"nota: {round(grade_response.final_grade, 2)}")
     logger.info(f"input tokens: {input_tokens}")
